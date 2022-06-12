@@ -10,6 +10,7 @@ _logger = logging.getLogger(__name__)
 @dataclass
 class Entry:
     title: str
+    project: str = None
     start: datetime.datetime = field(default_factory=datetime.datetime.now)
     finish: datetime.datetime = None
     description: str = None
@@ -21,9 +22,9 @@ if __name__ == '__main__':
 
     logger()
 
-    aap = Entry('Aap', tags=['demo', 'aap'])
-    noot = Entry('Noot')
-    mies = Entry('Mies', tags=['demo', 'mies'])
+    aap = Entry('Aap', project='demo', tags=['demo', 'aap'])
+    noot = Entry('Noot', project='demo', )
+    mies = Entry('Mies', project='demo', tags=['demo', 'mies'])
 
     print(aap)
     print(noot)
