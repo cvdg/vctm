@@ -7,7 +7,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from vctm.chain import Command
-from vctm.models import Base
 
 
 class DatabaseCommand(Command):
@@ -64,8 +63,13 @@ class LoggingCommand(Command):
         console.setLevel(logging.INFO)
         console.setFormatter(formatter)
 
-        logfile_name = os.path.join(
-            context['log_dir'], datetime.datetime.now().strftime('vctm-%Y%m%d.log'))
+        if 'logfile_name' in context:
+            logfile_name = context['logfile_name']
+        else:
+            logfile_name = os.path.join(
+                context['log_dir'], datetime.datetime.now().strftime('vctm-%Y%m%d.log'))
+            context['logfile_name'] = logfile_name
+
         logfile = logging.FileHandler(logfile_name, encoding='UTF-8')
         logfile.setLevel(logging.INFO)
         logfile.setFormatter(formatter)
@@ -74,7 +78,5 @@ class LoggingCommand(Command):
         root.setLevel(logging.INFO)
         root.addHandler(console)
         root.addHandler(logfile)
-
-        context['logfile_name'] = logfile_name
 
         return Command.SUCCESS

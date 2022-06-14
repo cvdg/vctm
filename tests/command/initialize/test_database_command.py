@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from vctm.chain import Command, Executor
 from vctm.command.initialize import DatabaseCommand, DirectoryCommand
-from vctm.models import JournalProject
+from vctm.models import Project
 
 
 class SuccessCommand(Command):
@@ -21,7 +21,7 @@ class FailureCommand(SuccessCommand):
 class ProjectCommand(Command):
     def execute(self, context: hash) -> bool:
         name = ''.join(random.choice(string.ascii_letters) for i in range(16))
-        prj = JournalProject(name=name)
+        prj = Project(name=name)
 
         session = context['db_session']
         session.add(prj)
@@ -73,7 +73,7 @@ def test_database_command02():
     name = context['project_name']
 
     with Session(engine) as session:
-        result = session.query(JournalProject).filter(JournalProject.name == name).one()
+        result = session.query(Project).filter(Project.name == name).one()
         assert result.name == name
         session.delete(result)
         session.commit()
@@ -97,6 +97,6 @@ def test_database_command03():
     name = context['project_name']
 
     with Session(engine) as session:
-        result = session.query(JournalProject).filter(JournalProject.name == name).first()
+        result = session.query(Project).filter(Project.name == name).first()
         assert result is None
         session.commit()
