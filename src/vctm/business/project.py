@@ -3,7 +3,6 @@ from vctm.command.validate import ProjectExistCommand
 from vctm.command.validate import ProjectNotExistCommand
 
 from vctm.command.process import ProjectAddCommand
-from vctm.command.process import ProjectClearCommand
 from vctm.command.process import ProjectDeleteCommand
 from vctm.command.process import ProjectListCommand
 

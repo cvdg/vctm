@@ -6,6 +6,7 @@ from vctm.models import Project
 
 class DatabaseCreateCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Creates the database schema"""
         engine = context["db_engine"]
 
         Base.metadata.create_all(engine)
@@ -17,34 +18,39 @@ class DatabaseCreateCommand(Command):
 
 class OrganisationAddCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Adds a new organisation"""
         session = context["db_session"]
-        name = context["organisation_name"]
+        organisation_name = context["organisation_name"]
 
-        organisation = Organisation(name=name)
+        organisation = Organisation(organisation_name=organisation_name)
         session.add(organisation)
 
-        context["message"] = f"Add Organisation: {name}"
+        context["message"] = f"Add Organisation: {organisation_name}"
 
         return Command.SUCCESS
 
 
 class OrganisationDeleteCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Deletes an organisation"""
         session = context["db_session"]
-        name = context["organisation_name"]
+        organisation_name = context["organisation_name"]
 
         organisation = (
-            session.query(Organisation).filter(Organisation.name == name).one()
+            session.query(Organisation)
+            .filter(Organisation.organisation_name == organisation_name)
+            .one()
         )
         session.delete(organisation)
 
-        context["message"] = f"Delete Organisation: {name}"
+        context["message"] = f"Delete Organisation: {organisation_name}"
 
         return Command.SUCCESS
 
 
 class OrganisationListCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Lists all organisations"""
         session = context["db_session"]
 
         organisations = session.query(Organisation).all()
@@ -55,70 +61,61 @@ class OrganisationListCommand(Command):
 
 class ProjectAddCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Adds a new project for an organisation"""
         session = context["db_session"]
         organisation_name = context["organisation_name"]
-        name = context["project_name"]
+        project_name = context["project_name"]
 
         organisation = (
             session.query(Organisation)
-            .filter(Organisation.name == organisation_name)
+            .filter(Organisation.organisation_name == organisation_name)
             .one()
         )
-        project = Project(name=name, organisation=organisation)
+        project = Project(project_name=project_name, organisation=organisation)
         session.add(project)
 
-        context["message"] = f"Add Project: {organisation_name}/{name}"
-
-        return Command.SUCCESS
-
-
-class ProjectClearCommand(Command):
-    def execute(self, context: hash) -> bool:
-        session = context["db_session"]
-
-        projects = session.query(Project).all()
-
-        for project in projects:
-            session.delete(project)
+        context["message"] = f"Add Project: {organisation_name}/{project_name}"
 
         return Command.SUCCESS
 
 
 class ProjectDeleteCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Deletes a project from an organisation"""
         session = context["db_session"]
         organisation_name = context["organisation_name"]
-        name = context["project_name"]
+        project_name = context["project_name"]
 
         organisation = (
             session.query(Organisation)
-            .filter(Organisation.name == organisation_name)
+            .filter(Organisation.organisation_name == organisation_name)
             .one()
         )
         project = (
             session.query(Project)
             .filter(
-                Project.name == name,
+                Project.name == project_name,
                 Project.organisation_id == organisation.organisation_id,
             )
             .one()
         )
         session.delete(project)
 
-        context["message"] = f"Delete Project: {organisation_name}/{name}"
+        context["message"] = f"Delete Project: {organisation_name}/{project_name}"
 
         return Command.SUCCESS
 
 
 class ProjectListCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Lists all projects, optional lists all projects for an organisation"""
         session = context["db_session"]
 
         if "organisation_name" in context:
             organisation_name = context["organisation_name"]
             organisation = (
                 session.query(Organisation)
-                .filter(Organisation.name == organisation_name)
+                .filter(Organisation.organisation_name == organisation_name)
                 .one()
             )
             projects = (
@@ -126,9 +123,9 @@ class ProjectListCommand(Command):
                 .filter(Project.organisation_id == organisation.organisation_id)
                 .all()
             )
-            context["projects"] = projects
         else:
             projects = session.query(Project).all()
-            context["projects"] = projects
+
+        context["projects"] = projects
 
         return Command.SUCCESS

@@ -11,6 +11,7 @@ from vctm.chain import Command
 
 class DatabaseCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Create a session to the SQLite database"""
         if "db_name" in context:
             db_name = context["db_name"]
         else:
@@ -26,6 +27,7 @@ class DatabaseCommand(Command):
         return Command.SUCCESS
 
     def post_execute(self, context: hash, success: bool, error: Exception) -> None:
+        """Commit or rollback the session"""
         session = context["db_session"]
 
         if success:
@@ -36,6 +38,7 @@ class DatabaseCommand(Command):
 
 class DirectoryCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Creates the initial directory structure"""
         context["base_dir"] = os.environ.get(
             "VCTM_DIR", os.path.join(Path.home(), "var", "vctm")
         )
@@ -57,6 +60,7 @@ class DirectoryCommand(Command):
 
 class LoggingCommand(Command):
     def execute(self, context: hash) -> bool:
+        """Configure a basic logging setup"""
         formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
 
         console = logging.StreamHandler()

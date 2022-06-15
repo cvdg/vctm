@@ -77,7 +77,9 @@ def project_list() -> None:
     print("| " + "id".rjust(3) + " | " + "organisation".rjust(12) + " |")
     print("| " + "-" * 3 + " | " + "-" * 12 + " |")
     for organisation in organisations:
-        print(f"| {organisation.organisation_id:3d} | {organisation.name: >12} |")
+        print(
+            f"| {organisation.organisation_id:3d} | {organisation.organisation_name: >12} |"
+        )
 
 
 @cli.group()
@@ -135,8 +137,9 @@ def project_list(organisation: str) -> None:
     )
     print("| " + "-" * 3 + " | " + "-" * 12 + " | " + "-" * 12 + " |")
     for project in projects:
+        organisation = project.organisation
         print(
-            f"| {project.project_id:3d} | {project.organisation.name: >12} | {project.name: <12} |"
+            f"| {project.project_id:3d} | {organisation.organisation_name: >12} | {project.project_name: <12} |"
         )
 
 

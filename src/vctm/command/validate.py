@@ -6,14 +6,16 @@ from vctm.models import Project
 class OrganisationExistCommand(Command):
     def execute(self, context: hash) -> bool:
         session = context["db_session"]
-        name = context["organisation_name"]
+        organisation_name = context["organisation_name"]
 
         exist = bool(
-            session.query(Organisation).filter(Organisation.name == name).first()
+            session.query(Organisation)
+            .filter(Organisation.organisation_name == organisation_name)
+            .first()
         )
 
         if not exist:
-            context["message"] = f"Organisation {name} does not exist"
+            context["message"] = f"Organisation {organisation_name} does not exist"
             return Command.FAILURE
 
         return Command.SUCCESS
@@ -22,14 +24,16 @@ class OrganisationExistCommand(Command):
 class OrganisationNotExistCommand(Command):
     def execute(self, context: hash) -> bool:
         session = context["db_session"]
-        name = context["organisation_name"]
+        organisation_name = context["organisation_name"]
 
         exist = bool(
-            session.query(Organisation).filter(Organisation.name == name).first()
+            session.query(Organisation)
+            .filter(Organisation.organisation_name == organisation_name)
+            .first()
         )
 
         if exist:
-            context["message"] = f"Organisation {name} does exist"
+            context["message"] = f"Organisation {organisation_name} exist"
             return Command.FAILURE
 
         return Command.SUCCESS
@@ -39,24 +43,26 @@ class ProjectExistCommand(Command):
     def execute(self, context: hash) -> bool:
         session = context["db_session"]
         organisation_name = context["organisation_name"]
-        name = context["project_name"]
+        project_name = context["project_name"]
 
         organisation = (
             session.query(Organisation)
-            .filter(Organisation.name == organisation_name)
+            .filter(Organisation.organisation_name == organisation_name)
             .one()
         )
         exist = bool(
             session.query(Project)
             .filter(
-                Project.name == name,
+                Project.project_name == project_name,
                 Project.organisation_id == organisation.organisation_id,
             )
             .first()
         )
 
         if not exist:
-            context["message"] = f"Project {organisation_name}/{name} does not exist"
+            context[
+                "message"
+            ] = f"Project {organisation_name}/{project_name} does not exist"
             return Command.FAILURE
 
         return Command.SUCCESS
@@ -66,24 +72,24 @@ class ProjectNotExistCommand(Command):
     def execute(self, context: hash) -> bool:
         session = context["db_session"]
         organisation_name = context["organisation_name"]
-        name = context["project_name"]
+        project_name = context["project_name"]
 
         organisation = (
             session.query(Organisation)
-            .filter(Organisation.name == organisation_name)
+            .filter(Organisation.organisation_name == organisation_name)
             .one()
         )
         exist = bool(
             session.query(Project)
             .filter(
-                Project.name == name,
+                Project.project_name == project_name,
                 Project.organisation_id == organisation.organisation_id,
             )
             .first()
         )
 
         if exist:
-            context["message"] = f"Project {organisation_name}/{name} exist"
+            context["message"] = f"Project {organisation_name}/{project_name} exist"
             return Command.FAILURE
 
         return Command.SUCCESS
