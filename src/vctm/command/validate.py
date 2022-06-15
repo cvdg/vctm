@@ -1,4 +1,6 @@
 from vctm.chain import Command
+
+from vctm.models import Directory
 from vctm.models import Organisation
 from vctm.models import Project
 
@@ -90,6 +92,42 @@ class ProjectNotExistCommand(Command):
 
         if exist:
             context["message"] = f"Project {organisation_name}/{project_name} exist"
+            return Command.FAILURE
+
+        return Command.SUCCESS
+
+
+class DirectoryExistCommand(Command):
+    def execute(self, context: hash) -> bool:
+        session = context["db_session"]
+        directory_name = context["directory_name"]
+
+        exist = bool(
+            session.query(Directory)
+            .filter(Directory.directory_name == directory_name)
+            .first()
+        )
+
+        if not exist:
+            context["message"] = f"Directory: {directory_name} does not exist"
+            return Command.FAILURE
+
+        return Command.SUCCESS
+
+
+class DirectoryNotExistCommand(Command):
+    def execute(self, context: hash) -> bool:
+        session = context["db_session"]
+        directory_name = context["directory_name"]
+
+        exist = bool(
+            session.query(Directory)
+            .filter(Directory.directory_name == directory_name)
+            .first()
+        )
+
+        if exist:
+            context["message"] = f"Directory: {directory_name} exist"
             return Command.FAILURE
 
         return Command.SUCCESS

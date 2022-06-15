@@ -1,3 +1,5 @@
+from vctm.business import BusinessLogic
+
 from vctm.command.validate import OrganisationExistCommand
 from vctm.command.validate import ProjectExistCommand
 from vctm.command.validate import ProjectNotExistCommand
@@ -5,8 +7,6 @@ from vctm.command.validate import ProjectNotExistCommand
 from vctm.command.process import ProjectAddCommand
 from vctm.command.process import ProjectDeleteCommand
 from vctm.command.process import ProjectListCommand
-
-from vctm.business import BusinessLogic
 
 
 class ProjectAddExecutor(BusinessLogic):

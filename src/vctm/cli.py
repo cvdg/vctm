@@ -1,4 +1,5 @@
 import getpass
+import os
 
 import click
 
@@ -11,6 +12,9 @@ from vctm.business.organisation import OrganisationListExecutor
 from vctm.business.project import ProjectAddExecutor
 from vctm.business.project import ProjectDeleteExecutor
 from vctm.business.project import ProjectListExecutor
+
+from vctm.business.directory import DirectoryAddExecutor
+from vctm.business.directory import DirectoryInfoExecutor
 
 
 def create_context() -> hash:
@@ -141,6 +145,43 @@ def project_list(organisation: str) -> None:
         print(
             f"| {project.project_id:3d} | {organisation.organisation_name: >12} | {project.project_name: <12} |"
         )
+
+
+@cli.group()
+def directory() -> None:
+    """Directory commands"""
+    pass
+
+
+@directory.command("add")
+@click.argument("organisation")
+@click.argument("project")
+@click.argument("name", default=os.getcwd())
+def directory_add(organisation: str, project: str, name: str) -> None:
+    """Add a dirctory to an organisation and project."""
+    context = create_context()
+    context["organisation_name"] = organisation
+    context["project_name"] = project
+    context["directory_name"] = os.path.abspath(name)
+    executor = DirectoryAddExecutor()
+    executor.execute(context)
+
+
+@directory.command("info")
+@click.argument("name", default=os.getcwd())
+def directory_info(name: str) -> None:
+    context = create_context()
+    context["directory_name"] = os.path.abspath(name)
+    executor = DirectoryInfoExecutor()
+    executor.execute(context)
+
+    directory = context["directory"]
+    project = directory.project
+    organisation = project.organisation
+
+    print(f"organisation: {organisation.organisation_name}")
+    print(f"     project: {project.project_name}")
+    print(f"   directory: {directory.directory_name}")
 
 
 if __name__ == "__main__":

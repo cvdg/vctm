@@ -44,9 +44,6 @@ class Project(Base):
 
 class Directory(Base):
     __tablename__ = "directories"
-    organisation_id = Column(
-        Integer, ForeignKey("organisations.organisation_id"), nullable=False
-    )
     project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
     directory_id = Column(Integer, primary_key=True)
     directory_name = Column(String(128))
@@ -55,12 +52,9 @@ class Directory(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    organisation = relationship("Organisation")
     project = relationship("Project")
 
-    __table_args__ = (
-        UniqueConstraint("organisation_id", "project_id", "directory_name"),
-    )
+    __table_args__ = (UniqueConstraint("directory_name"),)
 
 
 class Entry(Base):

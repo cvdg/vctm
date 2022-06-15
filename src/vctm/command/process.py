@@ -1,5 +1,5 @@
 from vctm.chain import Command
-from vctm.models import Base
+from vctm.models import Base, Directory
 from vctm.models import Organisation
 from vctm.models import Project
 
@@ -127,5 +127,48 @@ class ProjectListCommand(Command):
             projects = session.query(Project).all()
 
         context["projects"] = projects
+
+        return Command.SUCCESS
+
+
+class DirectoryAddCommand(Command):
+    def execute(self, context: hash) -> bool:
+        """Adds the current directory to an organisation and project"""
+        session = context["db_session"]
+        organisation_name = context["organisation_name"]
+        project_name = context["project_name"]
+        directory_name = context["directory_name"]
+
+        organisation = (
+            session.query(Organisation)
+            .filter(Organisation.organisation_name == organisation_name)
+            .one()
+        )
+        project = (
+            session.query(Project)
+            .filter(
+                Project.project_name == project_name,
+                Project.organisation == organisation,
+            )
+            .one()
+        )
+        directory = Directory(directory_name=directory_name, project=project)
+        session.add(directory)
+
+        context[
+            "message"
+        ] = f"Add Directory: {organisation_name}/{project_name}: {directory_name}"
+
+        return Command.SUCCESS
+
+
+class DirectoryInfoCommand(Command):
+    def execute(self, context: hash) -> bool:
+        session = context["db_session"]
+        directory_name = context["directory_name"]
+
+        directory = session.query(Directory).filter(Directory.directory_name == directory_name).one()
+
+        context["directory"] = directory
 
         return Command.SUCCESS
