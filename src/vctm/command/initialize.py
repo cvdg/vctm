@@ -11,22 +11,22 @@ from vctm.chain import Command
 
 class DatabaseCommand(Command):
     def execute(self, context: hash) -> bool:
-        if 'db_name' in context:
-            db_name = context['db_name']
+        if "db_name" in context:
+            db_name = context["db_name"]
         else:
-            db_name = os.path.join(context['db_dir'], 'vctm.db')
-            context['db_name'] = db_name
+            db_name = os.path.join(context["db_dir"], "vctm.db")
+            context["db_name"] = db_name
 
-        engine = create_engine(f'sqlite:///{db_name}', future=True)
+        engine = create_engine(f"sqlite:///{db_name}", future=True)
         session = Session(engine)
 
-        context['db_engine'] = engine
-        context['db_session'] = session
+        context["db_engine"] = engine
+        context["db_session"] = session
 
         return Command.SUCCESS
 
     def post_execute(self, context: hash, success: bool, error: Exception) -> None:
-        session = context['db_session']
+        session = context["db_session"]
 
         if success:
             session.commit()
@@ -36,41 +36,42 @@ class DatabaseCommand(Command):
 
 class DirectoryCommand(Command):
     def execute(self, context: hash) -> bool:
-        context['base_dir'] = os.environ.get(
-            'VCTM_DIR', os.path.join(Path.home(), 'var', 'vctm'))
-        context['db_dir'] = os.path.join(context['base_dir'], 'db')
-        context['log_dir'] = os.path.join(context['base_dir'], 'log')
-        context['tmp_dir'] = os.path.join(context['base_dir'], 'tmp')
+        context["base_dir"] = os.environ.get(
+            "VCTM_DIR", os.path.join(Path.home(), "var", "vctm")
+        )
+        context["db_dir"] = os.path.join(context["base_dir"], "db")
+        context["log_dir"] = os.path.join(context["base_dir"], "log")
+        context["tmp_dir"] = os.path.join(context["base_dir"], "tmp")
 
-        if not os.path.isdir(context['db_dir']):
-            os.makedirs(context['db_dir'])
+        if not os.path.isdir(context["db_dir"]):
+            os.makedirs(context["db_dir"])
 
-        if not os.path.isdir(context['log_dir']):
-            os.makedirs(context['log_dir'])
+        if not os.path.isdir(context["log_dir"]):
+            os.makedirs(context["log_dir"])
 
-        if not os.path.isdir(context['tmp_dir']):
-            os.makedirs(context['tmp_dir'])
+        if not os.path.isdir(context["tmp_dir"]):
+            os.makedirs(context["tmp_dir"])
 
         return Command.SUCCESS
 
 
 class LoggingCommand(Command):
     def execute(self, context: hash) -> bool:
-        formatter = logging.Formatter(
-            '%(asctime)s %(name)s %(levelname)s - %(message)s')
+        formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
 
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         console.setFormatter(formatter)
 
-        if 'logfile_name' in context:
-            logfile_name = context['logfile_name']
+        if "logfile_name" in context:
+            logfile_name = context["logfile_name"]
         else:
             logfile_name = os.path.join(
-                context['log_dir'], datetime.datetime.now().strftime('vctm-%Y%m%d.log'))
-            context['logfile_name'] = logfile_name
+                context["log_dir"], datetime.datetime.now().strftime("vctm-%Y%m%d.log")
+            )
+            context["logfile_name"] = logfile_name
 
-        logfile = logging.FileHandler(logfile_name, encoding='UTF-8')
+        logfile = logging.FileHandler(logfile_name, encoding="UTF-8")
         logfile.setLevel(logging.INFO)
         logfile.setFormatter(formatter)
 

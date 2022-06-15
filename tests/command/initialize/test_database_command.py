@@ -20,13 +20,13 @@ class FailureCommand(SuccessCommand):
 
 class ProjectCommand(Command):
     def execute(self, context: hash) -> bool:
-        name = ''.join(random.choice(string.ascii_letters) for i in range(16))
+        name = "".join(random.choice(string.ascii_letters) for i in range(16))
         prj = Project(name=name)
 
-        session = context['db_session']
+        session = context["db_session"]
         session.add(prj)
 
-        context['project_name'] = name
+        context["project_name"] = name
 
         return Command.SUCCESS
 
@@ -40,7 +40,7 @@ def test_database_command00():
     context = {}
 
     assert executor.execute(context)
-    assert 'db_session' in context
+    assert "db_session" in context
 
 
 def test_database_command01():
@@ -48,11 +48,11 @@ def test_database_command01():
     executor.add_initialize(DirectoryCommand())
     executor.add_initialize(DatabaseCommand())
     executor.add_process(FailureCommand())
-    
+
     context = {}
 
     assert not executor.execute(context)
-    assert 'db_session' in context
+    assert "db_session" in context
 
 
 def test_database_command02():
@@ -61,16 +61,16 @@ def test_database_command02():
     executor.add_initialize(DatabaseCommand())
     executor.add_process(ProjectCommand())
     executor.add_process(SuccessCommand())
-    
+
     context = {}
 
     assert executor.execute(context)
-    assert 'db_engine' in context
-    assert 'db_session' in context
-    assert 'project_name' in context
+    assert "db_engine" in context
+    assert "db_session" in context
+    assert "project_name" in context
 
-    engine = context['db_engine']
-    name = context['project_name']
+    engine = context["db_engine"]
+    name = context["project_name"]
 
     with Session(engine) as session:
         result = session.query(Project).filter(Project.name == name).one()
@@ -85,16 +85,16 @@ def test_database_command03():
     executor.add_initialize(DatabaseCommand())
     executor.add_process(ProjectCommand())
     executor.add_process(FailureCommand())
-    
+
     context = {}
 
     assert not executor.execute(context)
-    assert 'db_engine' in context
-    assert 'db_session' in context
-    assert 'project_name' in context
+    assert "db_engine" in context
+    assert "db_session" in context
+    assert "project_name" in context
 
-    engine = context['db_engine']
-    name = context['project_name']
+    engine = context["db_engine"]
+    name = context["project_name"]
 
     with Session(engine) as session:
         result = session.query(Project).filter(Project.name == name).first()

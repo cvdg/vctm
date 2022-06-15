@@ -7,8 +7,13 @@ class ReportCommand(Command):
     logger = logging.getLogger(__name__)
 
     def post_execute(self, context: hash, success: bool, error: Exception) -> None:
-        if 'message' in context:
-            message = context['message']
+        if "username" in context:
+            username = context["username"]
+        else:
+            username = "Unknown"
+
+        if "message" in context:
+            message = context["message"]
         else:
             message = None
 
@@ -16,11 +21,11 @@ class ReportCommand(Command):
             self.logger.exception(error)
         elif not success:
             if message:
-                self.logger.warning(f'Failure: {message}')
+                self.logger.warning(f"[{username}] Failure: {message}")
             else:
-                self.logger.warning('Failure')
+                self.logger.warning(f"[{username}] Failure")
         else:
             if message:
-                self.logger.info(f'Success: {message}')
+                self.logger.info(f"[{username}] Success: {message}")
             else:
-                self.logger.info('Success')
+                self.logger.info(f"[{username}] Success")

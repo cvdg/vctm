@@ -1,3 +1,4 @@
+import getpass
 
 import click
 
@@ -12,6 +13,14 @@ from vctm.business.project import ProjectDeleteExecutor
 from vctm.business.project import ProjectListExecutor
 
 
+def create_context() -> hash:
+    context = {}
+    context["interface"] = "cli"
+    context["username"] = getpass.getuser()
+
+    return context
+
+
 @click.group()
 def cli() -> None:
     pass
@@ -19,107 +28,117 @@ def cli() -> None:
 
 @cli.group()
 def database() -> None:
-    """ Database commands """
+    """Database commands"""
     pass
 
 
-@database.command('create')
+@database.command("create")
 def database_create() -> None:
-    """ Create a new database. """
+    """Create a new database."""
+    context = create_context()
     executor = DatabaseCreateExecutor()
-    context = executor.get_context()
-
     executor.execute(context)
 
 
 @cli.group()
 def organisation() -> None:
-    """ Organisation commands """
+    """Organisation commands"""
     pass
 
 
-@organisation.command('add')
-@click.argument('name')
+@organisation.command("add")
+@click.argument("name")
 def organisation_add(name: str) -> None:
-    """ Add a new organisation. """
+    """Add a new organisation."""
+    context = create_context()
+    context["organisation_name"] = name
     executor = OrganisationAddExecutor()
-    context = executor.get_context()
-    context['organisation_name'] = name
-
     executor.execute(context)
 
-@organisation.command('delete')
-@click.argument('name')
+
+@organisation.command("delete")
+@click.argument("name")
 def organisation_delete(name: str) -> None:
-    """ Delete a organisation. """
+    """Delete a organisation."""
+    context = create_context()
+    context["organisation_name"] = name
     executor = OrganisationDeleteExecutor()
-    context = executor.get_context()
-    context['organisation_name'] = name
-
     executor.execute(context)
 
 
-@organisation.command('list')
+@organisation.command("list")
 def project_list() -> None:
-    """ List all organisation. """
+    """List all organisation."""
+    context = create_context()
     executor = OrganisationListExecutor()
-    context = executor.get_context()
-
     executor.execute(context)
+    organisations = context["organisations"]
 
-    for organisation in context['organisations']:
-        print(f'{organisation.organisation_id:3d}: {organisation.name}')
+    print("| " + "id".rjust(3) + " | " + "organisation".rjust(12) + " |")
+    print("| " + "-" * 3 + " | " + "-" * 12 + " |")
+    for organisation in organisations:
+        print(f"| {organisation.organisation_id:3d} | {organisation.name: >12} |")
 
 
 @cli.group()
 def project() -> None:
-    """ Project commands """
+    """Project commands"""
     pass
 
 
-@project.command('add')
-@click.argument('organisation')
-@click.argument('name')
+@project.command("add")
+@click.argument("organisation")
+@click.argument("name")
 def project_add(organisation: str, name: str) -> None:
-    """ Add a new project. """
+    """Add a new project."""
+    context = create_context()
+    context["organisation_name"] = organisation
+    context["project_name"] = name
     executor = ProjectAddExecutor()
-    context = executor.get_context()
-    context['organisation_name'] = organisation
-    context['project_name'] = name
-
     executor.execute(context)
 
 
-@project.command('delete')
-@click.argument('organisation')
-@click.argument('name')
+@project.command("delete")
+@click.argument("organisation")
+@click.argument("name")
 def project_delete(organisation: str, name: str) -> None:
-    """ Delete a project. """
+    """Delete a project."""
+    context = create_context()
+    context["organisation_name"] = organisation
+    context["project_name"] = name
     executor = ProjectDeleteExecutor()
-    context = executor.get_context()
-    context['organisation_name'] = organisation
-    context['project_name'] = name
-
     executor.execute(context)
 
 
-@project.command('list')
-@click.option('-o', '--organisation', help='name of the organisation')
+@project.command("list")
+@click.option("-o", "--organisation", help="name of the organisation")
 def project_list(organisation: str) -> None:
-    """ List all projects. """
-    executor = ProjectListExecutor()
-    context = executor.get_context()
+    """List all projects."""
+    context = create_context()
 
     if organisation:
-        context['organisation_name'] = organisation
+        context["organisation_name"] = organisation
 
+    executor = ProjectListExecutor()
     executor.execute(context)
 
-    print('| ' + 'id'.rjust(3) + ' | ' + 'organisation'.rjust(12) + ' | ' + 'project'.ljust(12) + ' |')
-    print('| ' + '-' * 3 + ' | ' + '-' * 12 + ' | ' + '-' * 12 + ' |' )
-    for project in context['projects']:
-        print(f'| {project.project_id:3d} | {project.organisation.name: >12} | {project.name: <12} |')
+    projects = context["projects"]
+
+    print(
+        "| "
+        + "id".rjust(3)
+        + " | "
+        + "organisation".rjust(12)
+        + " | "
+        + "project".ljust(12)
+        + " |"
+    )
+    print("| " + "-" * 3 + " | " + "-" * 12 + " | " + "-" * 12 + " |")
+    for project in projects:
+        print(
+            f"| {project.project_id:3d} | {project.organisation.name: >12} | {project.name: <12} |"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

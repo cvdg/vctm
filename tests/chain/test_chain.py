@@ -9,18 +9,18 @@ class SuccessCommand(Command):
 
     def execute(self, context: hash) -> bool:
         # print(f'execute() {self.name}')
-        if 'count' in context:
-            context['count'] += 1
+        if "count" in context:
+            context["count"] += 1
         else:
-            context['count'] = 1
+            context["count"] = 1
         return Command.SUCCESS
 
     def post_execute(self, context: hash, success: bool, error: Exception) -> None:
         # print(f'post_execute() {self.name}')
-        if 'post_count' in context:
-            context['post_count'] += 1
+        if "post_count" in context:
+            context["post_count"] += 1
         else:
-            context['post_count'] = 1
+            context["post_count"] = 1
 
 
 class FailureCommand(SuccessCommand):
@@ -32,7 +32,7 @@ class FailureCommand(SuccessCommand):
 class ErrorCommand(SuccessCommand):
     def execute(self, context: hash) -> bool:
         super().execute(context)
-        raise Exception('testing')
+        raise Exception("testing")
 
 
 def test_success_chain():
@@ -40,9 +40,9 @@ def test_success_chain():
     success = True
     error = None
 
-    cmd0 = SuccessCommand('00')
-    cmd1 = SuccessCommand('01')
-    cmd2 = SuccessCommand('02')
+    cmd0 = SuccessCommand("00")
+    cmd1 = SuccessCommand("01")
+    cmd2 = SuccessCommand("02")
     chain = Chain()
     chain.add(cmd0)
     chain.add(cmd1)
@@ -59,8 +59,8 @@ def test_success_chain():
     assert success == Command.SUCCESS
     assert error is None
 
-    assert context['count'] == 3
-    assert context['post_count'] == 3
+    assert context["count"] == 3
+    assert context["post_count"] == 3
 
 
 def test_failure_chain():
@@ -68,11 +68,11 @@ def test_failure_chain():
     success = True
     error = None
 
-    cmd0 = SuccessCommand('00')
-    cmd1 = SuccessCommand('01')
-    cmd2 = SuccessCommand('02')
-    cmd3 = FailureCommand('03')
-    cmd4 = SuccessCommand('04')
+    cmd0 = SuccessCommand("00")
+    cmd1 = SuccessCommand("01")
+    cmd2 = SuccessCommand("02")
+    cmd3 = FailureCommand("03")
+    cmd4 = SuccessCommand("04")
     chain = Chain()
     chain.add(cmd0)
     chain.add(cmd1)
@@ -91,8 +91,8 @@ def test_failure_chain():
     assert success == Command.FAILURE
     assert error is None
 
-    assert context['count'] == 4
-    assert context['post_count'] == 5
+    assert context["count"] == 4
+    assert context["post_count"] == 5
 
 
 def test_error_chain():
@@ -100,11 +100,11 @@ def test_error_chain():
     success = True
     error = None
 
-    cmd0 = SuccessCommand('00')
-    cmd1 = SuccessCommand('01')
-    cmd2 = SuccessCommand('02')
-    cmd3 = ErrorCommand('03')
-    cmd4 = SuccessCommand('04')
+    cmd0 = SuccessCommand("00")
+    cmd1 = SuccessCommand("01")
+    cmd2 = SuccessCommand("02")
+    cmd3 = ErrorCommand("03")
+    cmd4 = SuccessCommand("04")
     chain = Chain()
     chain.add(cmd0)
     chain.add(cmd1)
@@ -123,9 +123,9 @@ def test_error_chain():
     assert success == Command.FAILURE
     assert error is not None
 
-    assert context['count'] == 4
-    assert context['post_count'] == 5
+    assert context["count"] == 4
+    assert context["post_count"] == 5
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

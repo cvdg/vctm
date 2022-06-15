@@ -20,7 +20,7 @@ class FailureCommand(SuccessCommand):
 
 class ErrorCommand(SuccessCommand):
     def execute(self, context: hash) -> bool:
-        raise Exception('testing')
+        raise Exception("testing")
 
 
 def test_success_command():
@@ -83,5 +83,5 @@ def test_error_command():
     assert cmd.executed == True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

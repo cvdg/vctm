@@ -16,28 +16,49 @@ class Organisation(Base):
     __tablename__ = "organisations"
     organisation_id = Column(Integer, primary_key=True)
     name = Column(String(128))
-    datetime_created = Column(DateTime(timezone=True),
-                              server_default=func.now())
-    datetime_updated = Column(DateTime(timezone=True), onupdate=func.now())
 
-    __table_args__ = (
-        UniqueConstraint('name'),
+    dt_created = Column(DateTime(timezone=True), server_default=func.now())
+    dt_updated = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    __table_args__ = (UniqueConstraint("name"),)
+
 
 class Project(Base):
     __tablename__ = "projects"
-    organisation_id = Column(Integer, ForeignKey("organisations.organisation_id"), nullable=False)
+    organisation_id = Column(
+        Integer, ForeignKey("organisations.organisation_id"), nullable=False
+    )
     project_id = Column(Integer, primary_key=True)
     name = Column(String(128))
-    datetime_created = Column(DateTime(timezone=True),
-                              server_default=func.now())
-    datetime_updated = Column(DateTime(timezone=True), onupdate=func.now())
+    dt_created = Column(DateTime(timezone=True), server_default=func.now())
+    dt_updated = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     organisation = relationship("Organisation")
 
-    __table_args__ = (
-        UniqueConstraint('project_id', 'name'),
+    __table_args__ = (UniqueConstraint("organisation_id", "name"),)
+
+
+class Directory(Base):
+    __tablename__ = "directories"
+    organisation_id = Column(
+        Integer, ForeignKey("organisations.organisation_id"), nullable=False
     )
+    project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
+    directory_id = Column(Integer, primary_key=True)
+    name = Column(String(128))
+    dt_created = Column(DateTime(timezone=True), server_default=func.now())
+    dt_updated = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    organisation = relationship("Organisation")
+    project = relationship("Project")
+
+    __table_args__ = (UniqueConstraint("organisation_id", "project_id", "name"),)
 
 
 class Entry(Base):
@@ -45,11 +66,12 @@ class Entry(Base):
     project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
     entry_id = Column(Integer, primary_key=True)
     title = Column(String(128))
-    start = Column(DateTime(timezone=True))
-    finish = Column(DateTime(timezone=True))
+    start = Column(DateTime())
+    finish = Column(DateTime())
 
-    datetime_created = Column(DateTime(timezone=True),
-                              server_default=func.now())
-    datetime_updated = Column(DateTime(timezone=True), onupdate=func.now())
+    dt_created = Column(DateTime(timezone=True), server_default=func.now())
+    dt_updated = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     project = relationship("Project")

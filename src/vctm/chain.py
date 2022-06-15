@@ -11,11 +11,11 @@ class Command:
     FAILURE = False
 
     def execute(self, context: hash) -> bool:
-        """ execute is called if previus commands where all a success. """
+        """execute is called if previus commands where all a success."""
         return Command.SUCCESS
 
     def post_execute(self, context: hash, success: bool, error: Exception) -> None:
-        """ post_execute is always called, even on an exception. """
+        """post_execute is always called, even on an exception."""
         pass
 
 
