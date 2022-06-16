@@ -2,9 +2,6 @@
 Chain of Command pattern.
 """
 
-from calendar import c
-from multiprocessing import AuthenticationError
-
 
 class Command:
     SUCCESS = True

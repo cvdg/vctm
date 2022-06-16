@@ -30,10 +30,12 @@ class DatabaseCommand(Command):
         """Commit or rollback the session"""
         session = context["db_session"]
 
-        if success:
-            session.commit()
-        else:
+        if error is not None:
             session.rollback()
+        elif not success:
+            session.rollback()
+        else:
+            session.commit()
 
 
 class DirectoryCommand(Command):
@@ -64,7 +66,7 @@ class LoggingCommand(Command):
         formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
 
         console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
+        console.setLevel(logging.WARNING)
         console.setFormatter(formatter)
 
         if "logfile_name" in context:
@@ -83,5 +85,15 @@ class LoggingCommand(Command):
         root.setLevel(logging.INFO)
         root.addHandler(console)
         root.addHandler(logfile)
+
+        return Command.SUCCESS
+
+
+class ExecutorCommand(Command):
+    def __init__(self, name: str):
+        self.name = name
+
+    def execute(self, context: hash) -> bool:
+        context["executor"] = self.name
 
         return Command.SUCCESS

@@ -9,6 +9,7 @@ class ReportCommand(Command):
         self.logger = logging.getLogger(__name__)
 
     def post_execute(self, context: hash, success: bool, error: Exception) -> None:
+        executor = context["executor"]
         if "username" in context:
             username = context["username"]
         else:
@@ -23,11 +24,22 @@ class ReportCommand(Command):
             self.logger.exception(error)
         elif not success:
             if message:
-                self.logger.warning(f"[{username}] Failure: {message}")
+                self.logger.warning(f"[{username}] {executor} Failure: {message}")
             else:
-                self.logger.warning(f"[{username}] Failure")
+                self.logger.warning(f"[{username}] {executor} Failure")
         else:
             if message:
-                self.logger.info(f"[{username}] Success: {message}")
+                self.logger.info(f"[{username}] {executor} Success: {message}")
             else:
-                self.logger.info(f"[{username}] Success")
+                self.logger.info(f"[{username}] {executor} Success")
+
+
+class DumpContextCommand(Command):
+    def __init__(self):
+        super().__init__()
+        self.logger = logging.getLogger(__name__)
+
+    def post_execute(self, context: hash, success: bool, error: Exception) -> None:
+        for key in context:
+            value = context[key]
+            self.logger.info(f"Key: {key}, Value: {value}")

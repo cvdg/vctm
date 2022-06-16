@@ -1,12 +1,14 @@
 from vctm.chain import Command
-from vctm.models import Base, Directory
+
+from vctm.models import Base
+from vctm.models import Directory
 from vctm.models import Organisation
 from vctm.models import Project
 
 
 class DatabaseCreateCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Creates the database schema"""
+        """Create the database schema"""
         engine = context["db_engine"]
 
         Base.metadata.create_all(engine)
@@ -18,7 +20,7 @@ class DatabaseCreateCommand(Command):
 
 class OrganisationAddCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Adds a new organisation"""
+        """Add a new organisation"""
         session = context["db_session"]
         organisation_name = context["organisation_name"]
 
@@ -32,7 +34,7 @@ class OrganisationAddCommand(Command):
 
 class OrganisationDeleteCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Deletes an organisation"""
+        """Delete an organisation"""
         session = context["db_session"]
         organisation_name = context["organisation_name"]
 
@@ -41,6 +43,7 @@ class OrganisationDeleteCommand(Command):
             .filter(Organisation.organisation_name == organisation_name)
             .one()
         )
+
         session.delete(organisation)
 
         context["message"] = f"Delete Organisation: {organisation_name}"
@@ -50,7 +53,7 @@ class OrganisationDeleteCommand(Command):
 
 class OrganisationListCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Lists all organisations"""
+        """List all organisations"""
         session = context["db_session"]
 
         organisations = session.query(Organisation).all()
@@ -61,7 +64,7 @@ class OrganisationListCommand(Command):
 
 class ProjectAddCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Adds a new project for an organisation"""
+        """Add a new project for an organisation"""
         session = context["db_session"]
         organisation_name = context["organisation_name"]
         project_name = context["project_name"]
@@ -81,7 +84,7 @@ class ProjectAddCommand(Command):
 
 class ProjectDeleteCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Deletes a project from an organisation"""
+        """Delete a project from an organisation"""
         session = context["db_session"]
         organisation_name = context["organisation_name"]
         project_name = context["project_name"]
@@ -108,23 +111,32 @@ class ProjectDeleteCommand(Command):
 
 class ProjectListCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Lists all projects, optional lists all projects for an organisation"""
+        """List all projects"""
         session = context["db_session"]
 
-        if "organisation_name" in context:
-            organisation_name = context["organisation_name"]
-            organisation = (
-                session.query(Organisation)
-                .filter(Organisation.organisation_name == organisation_name)
-                .one()
-            )
-            projects = (
-                session.query(Project)
-                .filter(Project.organisation_id == organisation.organisation_id)
-                .all()
-            )
-        else:
-            projects = session.query(Project).all()
+        projects = session.query(Project).all()
+
+        context["projects"] = projects
+
+        return Command.SUCCESS
+
+
+class ProjectListByOrganisationCommand(Command):
+    def execute(self, context: hash) -> bool:
+        """List all projects for an organisation"""
+        session = context["db_session"]
+        organisation_name = context["organisation_name"]
+
+        organisation = (
+            session.query(Organisation)
+            .filter(Organisation.organisation_name == organisation_name)
+            .one()
+        )
+        projects = (
+            session.query(Project)
+            .filter(Project.organisation_id == organisation.organisation_id)
+            .all()
+        )
 
         context["projects"] = projects
 
@@ -133,7 +145,7 @@ class ProjectListCommand(Command):
 
 class DirectoryAddCommand(Command):
     def execute(self, context: hash) -> bool:
-        """Adds the current directory to an organisation and project"""
+        """Add the current directory to an organisation and project"""
         session = context["db_session"]
         organisation_name = context["organisation_name"]
         project_name = context["project_name"]
@@ -152,12 +164,30 @@ class DirectoryAddCommand(Command):
             )
             .one()
         )
+
         directory = Directory(directory_name=directory_name, project=project)
         session.add(directory)
 
-        context[
-            "message"
-        ] = f"Add Directory: {organisation_name}/{project_name}: {directory_name}"
+        context["message"] = f"Add Directory: {directory_name}"
+
+        return Command.SUCCESS
+
+
+class DirectoryDeleteCommand(Command):
+    def execute(self, context: hash) -> bool:
+        """Delete a directory"""
+        session = context["db_session"]
+        directory_name = context["directory_name"]
+
+        directory = (
+            session.query(Directory)
+            .filter(Directory.directory_name == directory_name)
+            .one()
+        )
+
+        session.delete(directory)
+
+        context["message"] = f"Delete Directory: {directory_name}"
 
         return Command.SUCCESS
 
@@ -167,8 +197,24 @@ class DirectoryInfoCommand(Command):
         session = context["db_session"]
         directory_name = context["directory_name"]
 
-        directory = session.query(Directory).filter(Directory.directory_name == directory_name).one()
+        directory = (
+            session.query(Directory)
+            .filter(Directory.directory_name == directory_name)
+            .one()
+        )
 
         context["directory"] = directory
+
+        return Command.SUCCESS
+
+
+class DirectoryListCommand(Command):
+    def execute(self, context: hash) -> bool:
+        """List all directories"""
+        session = context["db_session"]
+
+        directories = session.query(Directory).all()
+
+        context["directories"] = directories
 
         return Command.SUCCESS

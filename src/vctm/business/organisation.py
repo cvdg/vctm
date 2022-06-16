@@ -1,3 +1,5 @@
+from vctm.business import BusinessLogic
+
 from vctm.command.validate import OrganisationExistCommand
 from vctm.command.validate import OrganisationNotExistCommand
 
@@ -5,12 +7,10 @@ from vctm.command.process import OrganisationAddCommand
 from vctm.command.process import OrganisationDeleteCommand
 from vctm.command.process import OrganisationListCommand
 
-from vctm.business import BusinessLogic
-
 
 class OrganisationAddExecutor(BusinessLogic):
     def __init__(self):
-        super().__init__()
+        super().__init__("OrganisationAddExecutor")
 
         self.add_validate(OrganisationNotExistCommand())
 
@@ -19,7 +19,7 @@ class OrganisationAddExecutor(BusinessLogic):
 
 class OrganisationDeleteExecutor(BusinessLogic):
     def __init__(self):
-        super().__init__()
+        super().__init__("OrganisationDeleteExecutor")
 
         self.add_validate(OrganisationExistCommand())
 
@@ -28,6 +28,6 @@ class OrganisationDeleteExecutor(BusinessLogic):
 
 class OrganisationListExecutor(BusinessLogic):
     def __init__(self):
-        super().__init__()
+        super().__init__("OrganisationListExecutor")
 
         self.add_process(OrganisationListCommand())

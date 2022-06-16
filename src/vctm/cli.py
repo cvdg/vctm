@@ -12,9 +12,12 @@ from vctm.business.organisation import OrganisationListExecutor
 from vctm.business.project import ProjectAddExecutor
 from vctm.business.project import ProjectDeleteExecutor
 from vctm.business.project import ProjectListExecutor
+from vctm.business.project import ProjectListByOrganisationExecutor
 
 from vctm.business.directory import DirectoryAddExecutor
+from vctm.business.directory import DirectoryDeleteExecutor
 from vctm.business.directory import DirectoryInfoExecutor
+from vctm.business.directory import DirectoryListExecutor
 
 
 def create_context() -> hash:
@@ -124,8 +127,10 @@ def project_list(organisation: str) -> None:
 
     if organisation:
         context["organisation_name"] = organisation
+        executor = ProjectListByOrganisationExecutor()
+    else:
+        executor = ProjectListExecutor()
 
-    executor = ProjectListExecutor()
     executor.execute(context)
 
     projects = context["projects"]
@@ -158,7 +163,7 @@ def directory() -> None:
 @click.argument("project")
 @click.argument("name", default=os.getcwd())
 def directory_add(organisation: str, project: str, name: str) -> None:
-    """Add a dirctory to an organisation and project."""
+    """Add a dirctory to an organisation and project"""
     context = create_context()
     context["organisation_name"] = organisation
     context["project_name"] = project
@@ -167,9 +172,20 @@ def directory_add(organisation: str, project: str, name: str) -> None:
     executor.execute(context)
 
 
+@directory.command("delete")
+@click.argument("name", default=os.getcwd())
+def directory_delete(name: str) -> None:
+    """Delete a dirctory"""
+    context = create_context()
+    context["directory_name"] = os.path.abspath(name)
+    executor = DirectoryDeleteExecutor()
+    executor.execute(context)
+
+
 @directory.command("info")
 @click.argument("name", default=os.getcwd())
 def directory_info(name: str) -> None:
+    """Show information for the directory"""
     context = create_context()
     context["directory_name"] = os.path.abspath(name)
     executor = DirectoryInfoExecutor()
@@ -182,6 +198,36 @@ def directory_info(name: str) -> None:
     print(f"organisation: {organisation.organisation_name}")
     print(f"     project: {project.project_name}")
     print(f"   directory: {directory.directory_name}")
+
+
+@directory.command("list")
+def directory_list() -> None:
+    """List all dirctories"""
+    context = create_context()
+    executor = DirectoryListExecutor()
+    executor.execute(context)
+
+    directories = context["directories"]
+
+    print(
+        "| "
+        + "id".rjust(3)
+        + " | "
+        + "organisation".rjust(12)
+        + " | "
+        + "project".ljust(12)
+        + " | "
+        + " directory"
+    )
+    print("| " + "-" * 3 + " | " + "-" * 12 + " | " + "-" * 12 + " | " + "-" * 12)
+
+    for directory in directories:
+        project = directory.project
+        organisation = project.organisation
+
+        print(
+            f"| {directory.directory_id:3d} | {organisation.organisation_name: >12} | {project.project_name: <12} | {directory.directory_name}"
+        )
 
 
 if __name__ == "__main__":
