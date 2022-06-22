@@ -19,6 +19,9 @@ from vctm.business.directory import DirectoryDeleteExecutor
 from vctm.business.directory import DirectoryInfoExecutor
 from vctm.business.directory import DirectoryListExecutor
 
+from vctm.business.entry import EntryAddExecutor
+from vctm.business.entry import EntryListExecutor
+
 
 def create_context() -> hash:
     context = {}
@@ -192,11 +195,11 @@ def directory_info(name: str) -> None:
     executor.execute(context)
 
     directory = context["directory"]
-    project = directory.project
-    organisation = project.organisation
+    project_name = context["project_name"]
+    organisation_name = context["organisation_name"]
 
-    print(f"organisation: {organisation.organisation_name}")
-    print(f"     project: {project.project_name}")
+    print(f"organisation: {organisation_name}")
+    print(f"     project: {project_name}")
     print(f"   directory: {directory.directory_name}")
 
 
@@ -227,6 +230,52 @@ def directory_list() -> None:
 
         print(
             f"| {directory.directory_id:3d} | {organisation.organisation_name: >12} | {project.project_name: <12} | {directory.directory_name}"
+        )
+
+
+@cli.group()
+def entry() -> None:
+    """Entry commands"""
+    pass
+
+
+@entry.command("add")
+@click.argument("name", default=os.getcwd())
+def entry_add(name: str) -> None:
+    """Add a entry to an organisation and project"""
+    context = create_context()
+    context["directory_name"] = os.path.abspath(name)
+    executor = EntryAddExecutor()
+    executor.execute(context)
+
+
+@entry.command("list")
+def entry_list() -> None:
+    """List all entries"""
+    context = create_context()
+    executor = EntryListExecutor()
+    executor.execute(context)
+
+    entries = context["entries"]
+
+    print(
+        "| "
+        + "id".rjust(3)
+        + " | "
+        + "organisation".rjust(12)
+        + " | "
+        + "project".ljust(12)
+        + " | "
+        + " directory"
+    )
+    print("| " + "-" * 3 + " | " + "-" * 12 + " | " + "-" * 12 + " | " + "-" * 12)
+
+    for entry in entries:
+        project = entry.project
+        organisation = project.organisation
+
+        print(
+            f"| {entry.entry_id:3d} | {organisation.organisation_name: >12} | {project.project_name: <12} | {entry.entry_name}"
         )
 
 

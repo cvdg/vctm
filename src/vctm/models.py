@@ -1,3 +1,4 @@
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
@@ -62,6 +63,8 @@ class Entry(Base):
     project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
     entry_id = Column(Integer, primary_key=True)
     entry_name = Column(String(128))
+    entry_active = Column(Boolean(), default=False)
+    entry_state = Column(String(8), default='new')
     entry_start = Column(DateTime())
     entry_finish = Column(DateTime())
 

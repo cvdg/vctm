@@ -4,6 +4,7 @@ from vctm.models import Base
 from vctm.models import Directory
 from vctm.models import Organisation
 from vctm.models import Project
+from vctm.models import Entry
 
 
 class DatabaseCreateCommand(Command):
@@ -204,6 +205,8 @@ class DirectoryInfoCommand(Command):
         )
 
         context["directory"] = directory
+        context["organisation_name"] = directory.project.organisation.organisation_name
+        context["project_name"] = directory.project.project_name
 
         return Command.SUCCESS
 
@@ -214,7 +217,61 @@ class DirectoryListCommand(Command):
         session = context["db_session"]
 
         directories = session.query(Directory).all()
-
         context["directories"] = directories
+
+        return Command.SUCCESS
+
+
+class EntryAddCommand(Command):
+    def execute(self, context: hash) -> bool:
+        """Add the entry to an organisation and project"""
+        session = context["db_session"]
+        organisation_name = context["organisation_name"]
+        project_name = context["project_name"]
+
+        organisation = (
+            session.query(Organisation)
+            .filter(Organisation.organisation_name == organisation_name)
+            .one()
+        )
+        project = (
+            session.query(Project)
+            .filter(
+                Project.project_name == project_name,
+                Project.organisation == organisation,
+            )
+            .one()
+        )
+
+        entry = Entry(project=project)
+        session.add(entry)
+        context["entry"] = entry
+
+        context["message"] = f"Add Entry: {entry.entry_id}"
+
+        return Command.SUCCESS
+
+
+class EntryDeleteCommand(Command):
+    def execute(self, context: hash) -> bool:
+        """Delete an entry"""
+        session = context["db_session"]
+        entry_id = context["entry_id"]
+
+        entry = session.query(Entry).filter(Entry.entry_id == entry_id).one()
+        session.delete(entry)
+
+        context["message"] = f"Delete Entry: {entry_id}"
+
+        return Command.SUCCESS
+
+
+class EntryListCommand(Command):
+    def execute(self, context: hash) -> bool:
+        """List all entries"""
+        session = context["db_session"]
+
+        entries = session.query(Entry).all()
+        context["entries"] = entries
 
         return Command.SUCCESS
